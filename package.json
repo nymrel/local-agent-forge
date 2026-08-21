@@ -1,0 +1,57 @@
+{
+  "name": "@nymrel/local-forge",
+  "version": "1.0.0",
+  "description": "Zero-cloud local GPU orchestrator, dynamic model router, and MCP server for agentic workflows with real-time token savings tracking.",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "bin": {
+    "local-forge": "./bin/local-forge.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE",
+    "llms.txt"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "node dist/src/cli.js",
+    "mcp": "node dist/src/cli.js mcp",
+    "test": "tsc && node --test dist/test/*.test.js",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nymrel/local-agent-forge.git"
+  },
+  "keywords": [
+    "local-ai",
+    "gpu-orchestrator",
+    "ollama",
+    "vllm",
+    "lm-studio",
+    "comfyui",
+    "whisper",
+    "mcp",
+    "model-context-protocol",
+    "model-router",
+    "token-economics",
+    "agentic-ai",
+    "nymrel"
+  ],
+  "author": "Nymrel / JalenBuilds LLC <contact@jalenbuilds.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nymrel/local-agent-forge/issues"
+  },
+  "homepage": "https://github.com/nymrel/local-agent-forge#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  }
+}

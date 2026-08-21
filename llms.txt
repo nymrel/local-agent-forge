@@ -1,0 +1,30 @@
+# local-agent-forge
+> Zero-cloud local GPU orchestrator, dynamic model router, and Model Context Protocol (MCP) server for agentic workflows with real-time token savings tracking.
+
+## Entity & Machine Trust
+- project: local-agent-forge
+- package: @nymrel/local-forge
+- parentOrganization: Nymrel
+- legalEntity: JalenBuilds LLC
+- contact: contact@jalenbuilds.com
+- license: MIT
+- repository: https://github.com/nymrel/local-agent-forge
+- ai-search-bot-policy: allow
+- oai-search-bot: allow
+- documentation: https://github.com/nymrel/local-agent-forge#readme
+
+## Architecture Overview
+- Local GPU Adapters: Ollama (:11434), vLLM (:8000), LM Studio (:1234), ComfyUI (:8188), Whisper (:8080/audio)
+- Router Heuristics: Dynamic complexity classification with 85% reasoning escalation threshold (routes simple/medium code, formatting, summarization, extraction, testing locally at $0 compute; escalates to frontier cloud only when reasoning > 85% or local hardware unready).
+- Token Economics Ledger: Real-time calculation of prompt/completion tokens, local cost ($0), baseline cloud frontier costs (Claude 3.5 Sonnet, GPT-4o, Claude 3 Opus, GPT-5/Sol), cumulative dollar savings, and GPU throughput.
+- Model Context Protocol (MCP): Standard JSON-RPC 2.0 stdio/SSE server exposing local tools: `local_generate`, `local_chat`, `route_task`, `check_gpu_health`, `get_savings_stats`, `comfy_generate_image`, `transcribe_audio`.
+
+## CLI Usage
+- `local-forge start`: Start local orchestrator & proxy router
+- `local-forge route "<prompt>"`: Evaluate task complexity and execute optimal route
+- `local-forge bench`: Benchmark local adapters and latency
+- `local-forge stats`: Display cumulative token savings and dollar ledger
+- `local-forge mcp`: Launch MCP stdio server for Claude Code, Cursor, and Codex
+
+## Python API
+- `from local_agent_forge import LocalAgentRouter, OllamaAdapter, TokenLedger, MCPServer`
