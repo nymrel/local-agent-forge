@@ -6,7 +6,7 @@ setup(
     description="Zero-cloud local GPU orchestrator, dynamic model router, and MCP server for agentic workflows with real-time token savings tracking.",
     long_description=open("README.md", "r", encoding="utf-8").read() if __import__("os").path.exists("README.md") else "",
     long_description_content_type="text/markdown",
-    author="Nymrel / JalenBuilds LLC",
+    author="Nymrel",
     author_email="contact@nymrel.com",
     license="MIT",
     url="https://github.com/nymrel/local-agent-forge",
