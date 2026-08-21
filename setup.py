@@ -7,7 +7,7 @@ setup(
     long_description=open("README.md", "r", encoding="utf-8").read() if __import__("os").path.exists("README.md") else "",
     long_description_content_type="text/markdown",
     author="Nymrel / JalenBuilds LLC",
-    author_email="contact@jalenbuilds.com",
+    author_email="contact@nymrel.com",
     license="MIT",
     url="https://github.com/nymrel/local-agent-forge",
     package_dir={"": "python"},

@@ -29,7 +29,7 @@
       "legalName": "JalenBuilds LLC",
       "url": "https://jalenbuilds.com"
     },
-    "email": "contact@jalenbuilds.com"
+    "email": "contact@nymrel.com"
   },
   "description": "Zero-cloud local GPU orchestrator and dynamic 85% reasoning escalation model router for agentic workflows."
 }
@@ -297,5 +297,5 @@ python -m unittest discover -s tests
 
 - **License:** MIT License
 - **Copyright:** (c) 2026 Nymrel / JalenBuilds LLC
-- **Contact:** `contact@jalenbuilds.com`
+- **Contact:** `contact@nymrel.com`
 - **Parent Organization:** JalenBuilds LLC

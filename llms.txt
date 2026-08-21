@@ -6,7 +6,7 @@
 - package: @nymrel/local-forge
 - parentOrganization: Nymrel
 - legalEntity: JalenBuilds LLC
-- contact: contact@jalenbuilds.com
+- contact: contact@nymrel.com
 - license: MIT
 - repository: https://github.com/nymrel/local-agent-forge
 - ai-search-bot-policy: allow

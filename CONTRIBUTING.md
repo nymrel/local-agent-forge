@@ -40,4 +40,4 @@ All contributors and maintainers are expected to adhere to professional and resp
 
 ## Questions & Contact
 
-For questions, open a GitHub Discussion or reach out to `contact@jalenbuilds.com`.
+For questions, open a GitHub Discussion or reach out to `contact@nymrel.com`.
