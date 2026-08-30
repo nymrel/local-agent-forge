@@ -1,23 +1,31 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Supported boundary
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+Local Agent Forge is pre-release and unpublished. Security fixes target the latest `main` source and active review candidate; no registry version is currently supported.
 
-## Reporting a Vulnerability
+## Report a vulnerability
 
-The Nymrel engineering team takes the security of our zero-cloud local AI ecosystem seriously. If you discover a security vulnerability in `local-agent-forge`, please report it responsibly:
+Send a private report to `contact@nymrel.com` with:
 
-1. **Email:** Send details to `contact@nymrel.com` with the subject `[SECURITY] local-agent-forge vulnerability`.
-2. **Details:** Include a clear description of the issue, reproduction steps, affected adapter/component, and environment details.
-3. **Response Time:** We acknowledge reports within 24 hours and aim to release a patch or advisory within 72 hours.
-4. **Public Disclosure:** Please do not open public GitHub issues for undisclosed security vulnerabilities until a patch is released.
+- the affected commit and runtime;
+- a minimal reproduction;
+- expected and observed behavior;
+- impact and any known preconditions; and
+- whether the report contains secrets or personal data.
 
-## Security Architecture
+Do not include live credentials, customer data, private model content, or destructive proof. Do not open a public issue for an unpatched vulnerability.
 
-`local-agent-forge` is built on a strict **Zero-Cloud Local Privacy** architecture:
-- Local endpoints (Ollama, vLLM, LM Studio, ComfyUI, Whisper) communicate over localhost loopback sockets (`127.0.0.1`).
-- No prompt data, tokens, or weights are logged to external servers unless explicit cloud escalation endpoints are configured and authorized.
-- The Model Context Protocol (MCP) server operates over standard I/O (stdio) or isolated local pipes.
+## Security assumptions
+
+- The proxy is intended to listen on `127.0.0.1`; broader exposure is unsupported without an independent authentication and network design.
+- The proxy does not opt into cross-origin browser access, requires the `Host` header to match its loopback listener, accepts POST bodies only as `application/json`, rejects invalid JSON, and caps request bodies at 1 MiB. It is still unauthenticated and must not be exposed beyond loopback.
+- Default adapters target loopback, but configured endpoints may be remote. HTTP(S) syntax validation does not make a host trustworthy and is not a complete SSRF control.
+- Endpoint URLs cannot contain credentials, query strings, or fragments. Supply API credentials through the adapter's explicit credential field where supported, never in a URL.
+- Local inference engines and MCP clients are separate trust domains with their own logging, persistence, plugins, permissions, and network behavior.
+- Prompt data can be sensitive. Operators are responsible for endpoint allowlisting, egress controls, model provenance, filesystem permissions, and log retention.
+- Cost comparisons, routing decisions, health probes, and model labels are advisory data—not authorization to call a provider or proof of privacy, availability, or savings.
+
+## Disclosure
+
+We will acknowledge a reproducible report, investigate it, and coordinate a fix before public disclosure when feasible. Publication and deployment are separate operator-controlled gates.

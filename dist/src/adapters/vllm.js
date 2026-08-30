@@ -5,6 +5,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VLLMAdapter = void 0;
+const http_url_js_1 = require("../utils/http-url.js");
 class VLLMAdapter {
     type = 'vllm';
     defaultEndpoint = 'http://127.0.0.1:8000';
@@ -13,7 +14,7 @@ class VLLMAdapter {
     apiKey;
     timeoutMs;
     constructor(options = {}) {
-        this.endpoint = options.endpoint || this.defaultEndpoint;
+        this.endpoint = (0, http_url_js_1.normalizeHttpBaseUrl)(options.endpoint ?? this.defaultEndpoint, 'vLLM endpoint');
         this.defaultModel = options.defaultModel || 'meta-llama/Llama-3.3-70B-Instruct';
         this.apiKey = options.apiKey || 'EMPTY';
         this.timeoutMs = options.timeoutMs || 30000;

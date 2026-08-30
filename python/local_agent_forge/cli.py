@@ -2,7 +2,6 @@
 Python CLI Interface for local-agent-forge
 """
 
-import sys
 import argparse
 from .adapters import AdapterRegistry
 from .router import LocalAgentRouter
@@ -11,18 +10,20 @@ from .mcp_server import MCPServer
 
 
 def main():
-    parser = argparse.ArgumentParser(description="local-agent-forge: Zero-Cloud Local GPU Orchestrator & Dynamic Model Router")
+    parser = argparse.ArgumentParser(
+        description="local-agent-forge: pre-release local inference adapters and deterministic heuristic routing"
+    )
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # route command
-    route_parser = subparsers.add_parser("route", help="Evaluate dynamic routing for a prompt")
+    route_parser = subparsers.add_parser("route", help="Evaluate the deterministic routing heuristic")
     route_parser.add_argument("prompt", type=str, help="Prompt text to analyze")
 
     # health command
     subparsers.add_parser("health", help="Probe local GPU adapters")
 
     # stats command
-    subparsers.add_parser("stats", help="Display token economics ledger")
+    subparsers.add_parser("stats", help="Display measured usage and illustrative cost comparisons")
 
     # mcp command
     subparsers.add_parser("mcp", help="Start Model Context Protocol (MCP) stdio server")

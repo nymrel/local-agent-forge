@@ -14,6 +14,7 @@ import {
   ChatResult,
   EmbeddingResult
 } from './base.js';
+import { normalizeHttpBaseUrl } from '../utils/http-url.js';
 
 export interface OllamaOptions {
   endpoint?: string;
@@ -29,7 +30,7 @@ export class OllamaAdapter implements ModelAdapter {
   private timeoutMs: number;
 
   constructor(options: OllamaOptions = {}) {
-    this.endpoint = options.endpoint || this.defaultEndpoint;
+    this.endpoint = normalizeHttpBaseUrl(options.endpoint ?? this.defaultEndpoint, 'Ollama endpoint');
     this.defaultModel = options.defaultModel || 'qwen2.5-coder:7b';
     this.timeoutMs = options.timeoutMs || 30000;
   }

@@ -13,6 +13,7 @@ import {
   ChatMessage,
   ChatResult
 } from './base.js';
+import { normalizeHttpBaseUrl } from '../utils/http-url.js';
 
 export interface VLLMOptions {
   endpoint?: string;
@@ -30,7 +31,7 @@ export class VLLMAdapter implements ModelAdapter {
   private timeoutMs: number;
 
   constructor(options: VLLMOptions = {}) {
-    this.endpoint = options.endpoint || this.defaultEndpoint;
+    this.endpoint = normalizeHttpBaseUrl(options.endpoint ?? this.defaultEndpoint, 'vLLM endpoint');
     this.defaultModel = options.defaultModel || 'meta-llama/Llama-3.3-70B-Instruct';
     this.apiKey = options.apiKey || 'EMPTY';
     this.timeoutMs = options.timeoutMs || 30000;

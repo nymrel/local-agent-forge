@@ -7,6 +7,7 @@ import {
   AdapterHealth,
   AdapterType
 } from './base.js';
+import { normalizeHttpBaseUrl } from '../utils/http-url.js';
 
 export interface ComfyImageResult {
   promptId: string;
@@ -43,7 +44,7 @@ export class ComfyUIAdapter {
   private clientId: string;
 
   constructor(options: { endpoint?: string; clientId?: string } = {}) {
-    this.endpoint = options.endpoint || this.defaultEndpoint;
+    this.endpoint = normalizeHttpBaseUrl(options.endpoint ?? this.defaultEndpoint, 'ComfyUI endpoint');
     this.clientId = options.clientId || `local-forge-${Math.random().toString(36).substring(2, 9)}`;
   }
 
