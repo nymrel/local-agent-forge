@@ -6,8 +6,6 @@ import sys
 import json
 from typing import Dict, Any, Optional
 from .router import LocalAgentRouter
-from .adapters import AdapterRegistry
-from .economics import TokenLedger
 
 MCP_TOOLS = [
     {

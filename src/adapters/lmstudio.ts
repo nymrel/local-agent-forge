@@ -13,6 +13,7 @@ import {
   ChatMessage,
   ChatResult
 } from './base.js';
+import { normalizeHttpBaseUrl } from '../utils/http-url.js';
 
 export interface LMStudioOptions {
   endpoint?: string;
@@ -28,7 +29,7 @@ export class LMStudioAdapter implements ModelAdapter {
   private timeoutMs: number;
 
   constructor(options: LMStudioOptions = {}) {
-    this.endpoint = options.endpoint || this.defaultEndpoint;
+    this.endpoint = normalizeHttpBaseUrl(options.endpoint ?? this.defaultEndpoint, 'LM Studio endpoint');
     this.defaultModel = options.defaultModel || 'local-model';
     this.timeoutMs = options.timeoutMs || 30000;
   }

@@ -5,6 +5,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OllamaAdapter = void 0;
+const http_url_js_1 = require("../utils/http-url.js");
 class OllamaAdapter {
     type = 'ollama';
     defaultEndpoint = 'http://127.0.0.1:11434';
@@ -12,7 +13,7 @@ class OllamaAdapter {
     defaultModel;
     timeoutMs;
     constructor(options = {}) {
-        this.endpoint = options.endpoint || this.defaultEndpoint;
+        this.endpoint = (0, http_url_js_1.normalizeHttpBaseUrl)(options.endpoint ?? this.defaultEndpoint, 'Ollama endpoint');
         this.defaultModel = options.defaultModel || 'qwen2.5-coder:7b';
         this.timeoutMs = options.timeoutMs || 30000;
     }

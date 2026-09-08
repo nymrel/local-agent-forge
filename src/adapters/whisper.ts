@@ -7,6 +7,7 @@ import {
   AdapterHealth,
   AdapterType
 } from './base.js';
+import { normalizeHttpBaseUrl } from '../utils/http-url.js';
 
 export interface WhisperTranscriptionResult {
   text: string;
@@ -33,7 +34,7 @@ export class WhisperAdapter {
   endpoint: string;
 
   constructor(options: { endpoint?: string } = {}) {
-    this.endpoint = options.endpoint || this.defaultEndpoint;
+    this.endpoint = normalizeHttpBaseUrl(options.endpoint ?? this.defaultEndpoint, 'Whisper endpoint');
   }
 
   async checkHealth(): Promise<AdapterHealth> {

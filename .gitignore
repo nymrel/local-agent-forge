@@ -1,14 +1,30 @@
-﻿node_modules/
-dist/
+# Dependencies
+node_modules/
+
+# Build outputs
 build/
+python-dist/
+release/
 *.egg-info/
+.eggs/
+
+# Python caches
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 .pytest_cache/
+.ruff_cache/
+.venv/
+.tmp-*-smoke/
+
+# Coverage and local environment
 .coverage
 coverage/
 .env
+
+# OS, editor, and logs
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
 *.log

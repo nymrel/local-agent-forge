@@ -5,10 +5,12 @@ Supports Ollama, vLLM, LM Studio, ComfyUI, and Whisper
 
 import json
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional
+
+from .http_url import normalize_http_base_url
 
 
 @dataclass
@@ -37,7 +39,7 @@ class CompletionResult:
 
 class OllamaAdapter:
     def __init__(self, endpoint: str = "http://127.0.0.1:11434", default_model: str = "qwen2.5-coder:7b", timeout: float = 30.0):
-        self.endpoint = endpoint.rstrip("/")
+        self.endpoint = normalize_http_base_url(endpoint, "Ollama endpoint")
         self.default_model = default_model
         self.timeout = timeout
         self.adapter_type = "ollama"
@@ -46,7 +48,8 @@ class OllamaAdapter:
         start = time.time()
         try:
             req = urllib.request.Request(f"{self.endpoint}/api/tags", headers={"User-Agent": "local-forge"})
-            with urllib.request.urlopen(req, timeout=3.0) as response:
+            # The request target is constructed from normalize_http_base_url output.
+            with urllib.request.urlopen(req, timeout=3.0) as response:  # nosec B310
                 latency_ms = (time.time() - start) * 1000.0
                 if response.status == 200:
                     data = json.loads(response.read().decode("utf-8"))
@@ -87,7 +90,8 @@ class OllamaAdapter:
             data=json.dumps(payload).encode("utf-8"),
             headers={"Content-Type": "application/json"}
         )
-        with urllib.request.urlopen(req, timeout=self.timeout) as response:
+        # The request target is constructed from normalize_http_base_url output.
+        with urllib.request.urlopen(req, timeout=self.timeout) as response:  # nosec B310
             data = json.loads(response.read().decode("utf-8"))
             duration_ms = (time.time() - start) * 1000.0
             text = data.get("response", "")
@@ -109,7 +113,7 @@ class OllamaAdapter:
 
 class VLLMAdapter:
     def __init__(self, endpoint: str = "http://127.0.0.1:8000", default_model: str = "meta-llama/Llama-3.3-70B-Instruct", api_key: str = "EMPTY", timeout: float = 30.0):
-        self.endpoint = endpoint.rstrip("/")
+        self.endpoint = normalize_http_base_url(endpoint, "vLLM endpoint")
         self.default_model = default_model
         self.api_key = api_key
         self.timeout = timeout
@@ -122,7 +126,8 @@ class VLLMAdapter:
                 f"{self.endpoint}/v1/models",
                 headers={"Authorization": f"Bearer {self.api_key}", "User-Agent": "local-forge"}
             )
-            with urllib.request.urlopen(req, timeout=3.0) as response:
+            # The request target is constructed from normalize_http_base_url output.
+            with urllib.request.urlopen(req, timeout=3.0) as response:  # nosec B310
                 latency_ms = (time.time() - start) * 1000.0
                 if response.status == 200:
                     data = json.loads(response.read().decode("utf-8"))
@@ -159,7 +164,8 @@ class VLLMAdapter:
             data=json.dumps(payload).encode("utf-8"),
             headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"}
         )
-        with urllib.request.urlopen(req, timeout=self.timeout) as response:
+        # The request target is constructed from normalize_http_base_url output.
+        with urllib.request.urlopen(req, timeout=self.timeout) as response:  # nosec B310
             data = json.loads(response.read().decode("utf-8"))
             duration_ms = (time.time() - start) * 1000.0
             choices = data.get("choices", [])
@@ -183,7 +189,7 @@ class VLLMAdapter:
 
 class LMStudioAdapter:
     def __init__(self, endpoint: str = "http://127.0.0.1:1234", default_model: str = "local-model", timeout: float = 30.0):
-        self.endpoint = endpoint.rstrip("/")
+        self.endpoint = normalize_http_base_url(endpoint, "LM Studio endpoint")
         self.default_model = default_model
         self.timeout = timeout
         self.adapter_type = "lmstudio"
@@ -192,7 +198,8 @@ class LMStudioAdapter:
         start = time.time()
         try:
             req = urllib.request.Request(f"{self.endpoint}/v1/models", headers={"User-Agent": "local-forge"})
-            with urllib.request.urlopen(req, timeout=3.0) as response:
+            # The request target is constructed from normalize_http_base_url output.
+            with urllib.request.urlopen(req, timeout=3.0) as response:  # nosec B310
                 latency_ms = (time.time() - start) * 1000.0
                 if response.status == 200:
                     data = json.loads(response.read().decode("utf-8"))
@@ -218,14 +225,15 @@ class LMStudioAdapter:
 
 class ComfyUIAdapter:
     def __init__(self, endpoint: str = "http://127.0.0.1:8188"):
-        self.endpoint = endpoint.rstrip("/")
+        self.endpoint = normalize_http_base_url(endpoint, "ComfyUI endpoint")
         self.adapter_type = "comfyui"
 
     def check_health(self) -> AdapterHealth:
         start = time.time()
         try:
             req = urllib.request.Request(f"{self.endpoint}/system_stats", headers={"User-Agent": "local-forge"})
-            with urllib.request.urlopen(req, timeout=3.0) as response:
+            # The request target is constructed from normalize_http_base_url output.
+            with urllib.request.urlopen(req, timeout=3.0) as response:  # nosec B310
                 latency_ms = (time.time() - start) * 1000.0
                 if response.status == 200:
                     data = json.loads(response.read().decode("utf-8"))
@@ -252,14 +260,15 @@ class ComfyUIAdapter:
 
 class WhisperAdapter:
     def __init__(self, endpoint: str = "http://127.0.0.1:8080"):
-        self.endpoint = endpoint.rstrip("/")
+        self.endpoint = normalize_http_base_url(endpoint, "Whisper endpoint")
         self.adapter_type = "whisper"
 
     def check_health(self) -> AdapterHealth:
         start = time.time()
         try:
             req = urllib.request.Request(f"{self.endpoint}/health", headers={"User-Agent": "local-forge"})
-            with urllib.request.urlopen(req, timeout=3.0) as response:
+            # The request target is constructed from normalize_http_base_url output.
+            with urllib.request.urlopen(req, timeout=3.0) as response:  # nosec B310
                 latency_ms = (time.time() - start) * 1000.0
                 if response.status == 200:
                     return AdapterHealth(

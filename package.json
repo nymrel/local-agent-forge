@@ -1,17 +1,29 @@
 {
   "name": "@nymrel/local-forge",
   "version": "1.0.0",
-  "description": "Zero-cloud local GPU orchestrator, dynamic model router, and MCP server for agentic workflows with real-time token savings tracking.",
+  "packageManager": "npm@11.19.1",
+  "description": "Pre-release local inference adapters, heuristic routing, MCP tools, and measured cost-comparison telemetry for agent workflows",
+  "type": "commonjs",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "bin": {
     "local-forge": "./bin/local-forge.js"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "require": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    }
+  },
   "files": [
-    "dist",
-    "bin",
+    "dist/src/",
+    "bin/local-forge.js",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE",
+    "RELEASE_READINESS.md",
+    "SECURITY.md",
     "llms.txt"
   ],
   "scripts": {
@@ -19,8 +31,15 @@
     "watch": "tsc -w",
     "start": "node dist/src/cli.js",
     "mcp": "node dist/src/cli.js mcp",
-    "test": "tsc && node --test dist/test/*.test.js",
-    "prepublishOnly": "npm run build && npm test"
+    "test": "npm run build && npm run test:node && npm run test:python",
+    "test:node": "node --test dist/test/*.test.js",
+    "test:python": "python -m unittest discover -s tests -p test_*.py",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build && npm run test:node && npm run test:python && npm run check:package",
+    "check:package": "npm run build && node scripts/check-package.mjs",
+    "audit:ci": "npm audit --audit-level=high",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run check"
   },
   "repository": {
     "type": "git",
@@ -48,13 +67,16 @@
   },
   "homepage": "https://github.com/nymrel/local-agent-forge#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.19 <27",
+    "npm": ">=11.5 <12"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.5.0"
+    "@types/node": "22.20.1",
+    "typescript": "5.9.3"
   },
+  "sideEffects": false,
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

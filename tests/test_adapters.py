@@ -16,9 +16,53 @@ from local_agent_forge.adapters import (
     WhisperAdapter,
     AdapterRegistry,
 )
+from local_agent_forge.http_url import normalize_http_base_url
 
 
 class TestAdapters(unittest.TestCase):
+    def test_http_endpoint_boundary(self):
+        self.assertEqual(
+            normalize_http_base_url(" https://Example.test:8443/api/// "),
+            "https://example.test:8443/api",
+        )
+        self.assertEqual(normalize_http_base_url("http://[::1]:11434/"), "http://[::1]:11434")
+        self.assertEqual(
+            normalize_http_base_url("http://Example.test:80/api///"),
+            "http://example.test/api",
+        )
+        self.assertEqual(
+            normalize_http_base_url("https://Example.test:443/api///"),
+            "https://example.test/api",
+        )
+        self.assertEqual(
+            normalize_http_base_url(r"https://Example.test\api///"),
+            "https://example.test/api",
+        )
+
+        invalid_endpoints = (
+            "",
+            "/api",
+            "file:///tmp/socket",
+            "ftp://example.test/models",
+            "http://user:secret@example.test",
+            "https://example.test/api?token=secret",
+            "https://example.test/api#fragment",
+            "http://example.test/\nheader",
+        )
+        for endpoint in invalid_endpoints:
+            with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
+                normalize_http_base_url(endpoint)
+
+    def test_all_adapters_validate_custom_endpoints(self):
+        for adapter_class in (OllamaAdapter, VLLMAdapter, LMStudioAdapter, ComfyUIAdapter, WhisperAdapter):
+            with self.subTest(adapter=adapter_class.__name__):
+                adapter = adapter_class(endpoint="https://models.example.test/api///")
+                self.assertEqual(adapter.endpoint, "https://models.example.test/api")
+                with self.assertRaises(ValueError):
+                    adapter_class(endpoint="file:///tmp/adapter.sock")
+                with self.assertRaises(ValueError):
+                    adapter_class(endpoint="https://user:secret@models.example.test")
+
     def test_default_endpoints(self):
         ollama = OllamaAdapter()
         self.assertEqual(ollama.endpoint, "http://127.0.0.1:11434")

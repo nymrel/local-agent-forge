@@ -5,6 +5,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LMStudioAdapter = void 0;
+const http_url_js_1 = require("../utils/http-url.js");
 class LMStudioAdapter {
     type = 'lmstudio';
     defaultEndpoint = 'http://127.0.0.1:1234';
@@ -12,7 +13,7 @@ class LMStudioAdapter {
     defaultModel;
     timeoutMs;
     constructor(options = {}) {
-        this.endpoint = options.endpoint || this.defaultEndpoint;
+        this.endpoint = (0, http_url_js_1.normalizeHttpBaseUrl)(options.endpoint ?? this.defaultEndpoint, 'LM Studio endpoint');
         this.defaultModel = options.defaultModel || 'local-model';
         this.timeoutMs = options.timeoutMs || 30000;
     }
