@@ -1,30 +1,27 @@
-# local-agent-forge
-> Zero-cloud local GPU orchestrator, dynamic model router, and Model Context Protocol (MCP) server for agentic workflows with real-time token savings tracking.
+# Local Agent Forge
 
-## Entity & Machine Trust
-- project: local-agent-forge
-- package: @nymrel/local-forge
-- parentOrganization: Nymrel
-- legalEntity: JalenBuilds LLC
-- contact: contact@nymrel.com
-- license: MIT
-- repository: https://github.com/nymrel/local-agent-forge
-- ai-search-bot-policy: allow
-- oai-search-bot: allow
-- documentation: https://github.com/nymrel/local-agent-forge#readme
+Status: pre-release source candidate; not published to npm or PyPI as checked 2026-08-30.
+Repository: https://github.com/nymrel/local-agent-forge
+License: MIT
+Maintainer: Nymrel <contact@nymrel.com>
 
-## Architecture Overview
-- Local GPU Adapters: Ollama (:11434), vLLM (:8000), LM Studio (:1234), ComfyUI (:8188), Whisper (:8080/audio)
-- Router Heuristics: Dynamic complexity classification with 85% reasoning escalation threshold (routes simple/medium code, formatting, summarization, extraction, testing locally at $0 compute; escalates to frontier cloud only when reasoning > 85% or local hardware unready).
-- Token Economics Ledger: Real-time calculation of prompt/completion tokens, local cost ($0), baseline cloud frontier costs (Claude 3.5 Sonnet, GPT-4o, Claude 3 Opus, GPT-5/Sol), cumulative dollar savings, and GPU throughput.
-- Model Context Protocol (MCP): Standard JSON-RPC 2.0 stdio/SSE server exposing local tools: `local_generate`, `local_chat`, `route_task`, `check_gpu_health`, `get_savings_stats`, `comfy_generate_image`, `transcribe_audio`.
+## Evidence-backed surface
 
-## CLI Usage
-- `local-forge start`: Start local orchestrator & proxy router
-- `local-forge route "<prompt>"`: Evaluate task complexity and execute optimal route
-- `local-forge bench`: Benchmark local adapters and latency
-- `local-forge stats`: Display cumulative token savings and dollar ledger
-- `local-forge mcp`: Launch MCP stdio server for Claude Code, Cursor, and Codex
+- TypeScript and Python adapters for Ollama, vLLM, LM Studio, ComfyUI, and Whisper-compatible HTTP endpoints.
+- Deterministic heuristic routing decisions, runtime health probes, cost-comparison ledgers, a CLI, and experimental MCP tools.
+- Loopback defaults, loopback-only proxy listener, and credential-free HTTP(S) custom endpoint validation.
+- Local unit, package, and security gates described in README.md and RELEASE_READINESS.md.
 
-## Python API
-- `from local_agent_forge import LocalAgentRouter, OllamaAdapter, TokenLedger, MCPServer`
+## Do not infer
+
+- No registry package, tag, release, deployment, configured provider, installed model, customer activation, privacy certification, measured savings, coverage percentage, or revenue is proven by this source tree.
+- A CLOUD decision is advisory and does not execute or authorize a provider request.
+- The 0.85 threshold, model names, and cost baselines are configurable or illustrative inputs and may be stale.
+- MCP protocol-version output is not independent compatibility certification.
+
+## Trusted documents
+
+- README.md: source evaluation and runtime boundaries
+- SECURITY.md: trust model and private reporting
+- RELEASE_READINESS.md: publication gates
+- CHANGELOG.md: unreleased source changes

@@ -9,6 +9,55 @@ import { TokenLedger } from './economics/index.js';
 import { MCPServer } from './mcp/index.js';
 import * as http from 'node:http';
 
+const MAX_PROXY_REQUEST_BYTES = 1_048_576;
+export const DEFAULT_PROXY_HOST = '127.0.0.1';
+
+class ProxyRequestError extends Error {
+  constructor(
+    readonly statusCode: number,
+    message: string
+  ) {
+    super(message);
+    this.name = 'ProxyRequestError';
+  }
+}
+
+async function readRequestBody(req: http.IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  let receivedBytes = 0;
+
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    receivedBytes += buffer.length;
+    if (receivedBytes > MAX_PROXY_REQUEST_BYTES) {
+      throw new ProxyRequestError(413, `Request body exceeds ${MAX_PROXY_REQUEST_BYTES} bytes`);
+    }
+    chunks.push(buffer);
+  }
+
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+function hasAllowedProxyHost(req: http.IncomingMessage): boolean {
+  const hostHeader = req.headers.host;
+  const localPort = req.socket.localPort;
+  if (!hostHeader || !localPort) return false;
+
+  try {
+    const parsed = new URL(`http://${hostHeader}`);
+    const isLoopbackHost = parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost';
+    const isBareAuthority =
+      !parsed.username && !parsed.password && parsed.pathname === '/' && !parsed.search && !parsed.hash;
+    return isLoopbackHost && isBareAuthority && parsed.port === String(localPort);
+  } catch {
+    return false;
+  }
+}
+
+function hasJsonContentType(req: http.IncomingMessage): boolean {
+  return req.headers['content-type']?.split(';', 1)[0]?.trim().toLowerCase() === 'application/json';
+}
+
 export async function runCli(argv: string[] = process.argv.slice(2)): Promise<void> {
   const command = argv[0] || 'help';
 
@@ -148,18 +197,17 @@ async function handleStatsCommand(): Promise<void> {
   console.log('\n' + ledger.formatAsciiDashboard() + '\n');
 }
 
-async function startHttpProxy(port: number): Promise<void> {
+export function createHttpProxyServer(): http.Server {
   const router = new LocalAgentRouter();
 
-  const server = http.createServer(async (req, res) => {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return http.createServer(async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
 
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
+    if (!hasAllowedProxyHost(req)) {
+      res.writeHead(421, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: 'Request Host must match the loopback listener' }));
       return;
     }
 
@@ -177,70 +225,87 @@ async function startHttpProxy(port: number): Promise<void> {
     }
 
     if ((req.url === '/v1/chat/completions' || req.url === '/v1/completions' || req.url === '/route') && req.method === 'POST') {
-      let body = '';
-      req.on('data', chunk => { body += chunk; });
-      req.on('end', async () => {
+      if (!hasJsonContentType(req)) {
+        res.writeHead(415, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ error: 'Content-Type must be application/json' }));
+        return;
+      }
+
+      try {
+        const body = await readRequestBody(req);
+        let parsed: any;
         try {
-          const parsed = JSON.parse(body || '{}');
-          const prompt = parsed.prompt || (parsed.messages ? parsed.messages.map((m: any) => `${m.role}: ${m.content}`).join('\n') : '');
-          
-          if (req.url === '/route') {
-            const decision = await router.evaluate(prompt);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(decision));
-            return;
-          }
-
-          const result = await router.execute(prompt, {
-            preferredModel: parsed.model,
-            temperature: parsed.temperature,
-            maxTokens: parsed.max_tokens
-          });
-
-          // OpenAI compatible response format
-          const openAiResponse = {
-            id: `chatcmpl-${Date.now()}`,
-            object: 'chat.completion',
-            created: Math.floor(Date.now() / 1000),
-            model: result.modelUsed,
-            choices: [
-              {
-                index: 0,
-                message: {
-                  role: 'assistant',
-                  content: result.text
-                },
-                finish_reason: 'stop'
-              }
-            ],
-            usage: {
-              prompt_tokens: result.actualTokens.prompt,
-              completion_tokens: result.actualTokens.completion,
-              total_tokens: result.actualTokens.total
-            },
-            forge_meta: {
-              route: result.decision.route,
-              adapter: result.adapterUsed,
-              savedDollars: result.dollarSavings,
-              latencyMs: result.durationMs
-            }
-          };
-
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(openAiResponse));
-        } catch (err: any) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: err.message }));
+          parsed = JSON.parse(body || '{}');
+        } catch {
+          throw new ProxyRequestError(400, 'Request body must contain valid JSON');
         }
-      });
+        const prompt = parsed.prompt || (parsed.messages ? parsed.messages.map((m: any) => `${m.role}: ${m.content}`).join('\n') : '');
+          
+        if (req.url === '/route') {
+          const decision = await router.evaluate(prompt);
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify(decision));
+          return;
+        }
+
+        const result = await router.execute(prompt, {
+          preferredModel: parsed.model,
+          temperature: parsed.temperature,
+          maxTokens: parsed.max_tokens
+        });
+
+        // OpenAI-compatible response shape for local evaluation.
+        const openAiResponse = {
+          id: `chatcmpl-${Date.now()}`,
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: result.modelUsed,
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: result.text
+              },
+              finish_reason: 'stop'
+            }
+          ],
+          usage: {
+            prompt_tokens: result.actualTokens.prompt,
+            completion_tokens: result.actualTokens.completion,
+            total_tokens: result.actualTokens.total
+          },
+          forge_meta: {
+            route: result.decision.route,
+            adapter: result.adapterUsed,
+            savedDollars: result.dollarSavings,
+            latencyMs: result.durationMs
+          }
+        };
+
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify(openAiResponse));
+      } catch (err: unknown) {
+        if (err instanceof ProxyRequestError) {
+          res.writeHead(err.statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: err.message }));
+        } else {
+          console.error('Local proxy request failed:', err);
+          res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: 'Request failed' }));
+        }
+      }
       return;
     }
 
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Endpoint not found' }));
   });
+}
 
-  server.listen(port, () => {
+async function startHttpProxy(port: number): Promise<void> {
+  const server = createHttpProxyServer();
+  server.listen(port, DEFAULT_PROXY_HOST, () => {
     console.log(`\n🚀 Local Agent Forge Proxy Server running at http://127.0.0.1:${port}`);
     console.log(`   - OpenAI Compatible Chat: POST http://127.0.0.1:${port}/v1/chat/completions`);
     console.log(`   - Dynamic Route Tester : POST http://127.0.0.1:${port}/route`);
@@ -251,19 +316,19 @@ async function startHttpProxy(port: number): Promise<void> {
 
 function printHelp(): void {
   console.log(`
-Local Agent Forge CLI - Zero-Cloud Local GPU Orchestrator & Dynamic Model Router
+Local Agent Forge CLI - Pre-release Local Inference Adapter and Heuristic Router
 Copyright (c) 2026 Nymrel / JalenBuilds LLC
 
 USAGE:
   local-forge <command> [options]
 
 COMMANDS:
-  start [--port 4000]    Start the OpenAI-compatible zero-cloud local proxy router
-  route "<prompt>"       Classify task complexity and evaluate 85% reasoning escalation route
+  start [--port 4000]    Start the loopback-only OpenAI-compatible proxy
+  route "<prompt>"       Evaluate the deterministic 0.85 routing heuristic
   bench                  Benchmark latency and throughput across local inference engines
   health | status        Probe status, latency, and available models on localhost
-  stats                  Display token savings ledger and financial analytics
-  mcp                    Launch Model Context Protocol (MCP) stdio server for Claude/Cursor/Codex
+  stats                  Display measured usage and illustrative cost comparisons
+  mcp                    Launch the experimental MCP stdio server
   version                Print version information
   help                   Show this help menu
 
@@ -271,6 +336,10 @@ EXAMPLES:
   local-forge route "Convert this SQL query to TypeScript Prisma schema"
   local-forge start --port 4000
   local-forge mcp
+
+NOTICE:
+  Routing decisions are advisory. Model availability, provider execution,
+  privacy, pricing, and savings require separate current evidence.
 `);
 }
 

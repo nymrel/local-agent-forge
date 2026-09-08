@@ -4,9 +4,9 @@ Dynamic Model Router and Heuristic Task Classifier for Python
 
 import re
 from enum import Enum
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
-from .adapters import AdapterRegistry, CompletionResult
+from dataclasses import dataclass
+from typing import List, Optional
+from .adapters import AdapterRegistry
 from .economics import TokenLedger, CLOUD_BASELINES, calculate_cost
 
 

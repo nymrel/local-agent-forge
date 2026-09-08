@@ -3,9 +3,8 @@ Token Economics and Financial Savings Ledger for Python
 """
 
 import time
-import math
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -118,8 +117,6 @@ class TokenLedger:
     ) -> LedgerTransaction:
         b_key = baseline_override or self.baseline_key
         baseline_pricing = CLOUD_BASELINES.get(b_key, CLOUD_BASELINES[DEFAULT_BASELINE_MODEL])
-        local_pricing = CLOUD_BASELINES["local-gpu"]
-
         actual_cost = 0.0 if is_local else calculate_cost(prompt_tokens, completion_tokens, baseline_pricing)
         baseline_cost = calculate_cost(prompt_tokens, completion_tokens, baseline_pricing)
         saved_dollars = max(0.0, round(baseline_cost - actual_cost, 6))

@@ -5,13 +5,14 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComfyUIAdapter = void 0;
+const http_url_js_1 = require("../utils/http-url.js");
 class ComfyUIAdapter {
     type = 'comfyui';
     defaultEndpoint = 'http://127.0.0.1:8188';
     endpoint;
     clientId;
     constructor(options = {}) {
-        this.endpoint = options.endpoint || this.defaultEndpoint;
+        this.endpoint = (0, http_url_js_1.normalizeHttpBaseUrl)(options.endpoint ?? this.defaultEndpoint, 'ComfyUI endpoint');
         this.clientId = options.clientId || `local-forge-${Math.random().toString(36).substring(2, 9)}`;
     }
     async checkHealth() {

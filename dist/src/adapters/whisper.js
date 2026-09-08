@@ -5,12 +5,13 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WhisperAdapter = void 0;
+const http_url_js_1 = require("../utils/http-url.js");
 class WhisperAdapter {
     type = 'whisper';
     defaultEndpoint = 'http://127.0.0.1:8080';
     endpoint;
     constructor(options = {}) {
-        this.endpoint = options.endpoint || this.defaultEndpoint;
+        this.endpoint = (0, http_url_js_1.normalizeHttpBaseUrl)(options.endpoint ?? this.defaultEndpoint, 'Whisper endpoint');
     }
     async checkHealth() {
         const start = Date.now();

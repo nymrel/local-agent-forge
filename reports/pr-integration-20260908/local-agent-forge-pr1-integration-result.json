@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "local-agent-forge-pr1-integration-result/v1",
+  "status": "candidate_validated",
+  "candidate": {
+    "branch": "codex/local-agent-forge-pr1-integration-20260908",
+    "base": "e95ead8dada152ba4f0a3ffee48470af6710b0c7"
+  },
+  "source": {
+    "pr": 1,
+    "head": "96880b91da004ebda51cc0a7b835ea58e620aa6b",
+    "mergeBase": "e95ead8dada152ba4f0a3ffee48470af6710b0c7",
+    "fullDiffFiles": 67
+  },
+  "implementation": [
+    "Retargeted the full runtime, release, package, source-map, and documentation cohort.",
+    "Preserved URL normalization as syntax-only and aligned Python hostname casing with the JavaScript normalizer.",
+    "Kept the loopback proxy bounded to JSON requests, exact listener Host matching, no CORS, and a one-MiB request limit."
+  ],
+  "validation": {
+    "passed": [
+      "npm ci",
+      "npm run check: typecheck, dist build, 30 Node tests, 11 Python tests, npm package contract",
+      "npm audit --audit-level=high",
+      "source-to-committed-dist rebuild comparison with no unstaged dist difference",
+      "Python wheel and sdist build plus package-content check",
+      "installed-wheel import and local-forge-py --help smoke",
+      "cross-language URL canonicalization smoke"
+    ],
+    "environmentLimit": "The local host used Node 22.17 and npm 10.9 while package engines require Node >=22.19 and npm >=11.5. Contracts passed, but exact engine-minimum coverage remains CI-scoped."
+  },
+  "securityBoundaries": {
+    "validated": [
+      "invalid JSON denial without CORS",
+      "oversized body denial",
+      "spoofed Host denial",
+      "cross-site content-type denial",
+      "credential, query, fragment, control-character, relative, and non-HTTP URL denial"
+    ],
+    "notClaimed": [
+      "endpoint trust or locality from URL syntax",
+      "provider reachability or credentials",
+      "release publication, trusted-publisher configuration, or ownership"
+    ]
+  },
+  "operations": {
+    "pushed": false,
+    "merged": false,
+    "deployed": false,
+    "providerOrAccountMutation": false
+  }
+}
