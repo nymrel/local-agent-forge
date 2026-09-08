@@ -13,6 +13,9 @@ describe('HTTP adapter endpoint boundary', () => {
   test('normalizes credential-free HTTP(S) base URLs', () => {
     assert.equal(normalizeHttpBaseUrl(' https://Example.test:8443/api/// '), 'https://example.test:8443/api');
     assert.equal(normalizeHttpBaseUrl('http://[::1]:11434/'), 'http://[::1]:11434');
+    assert.equal(normalizeHttpBaseUrl('http://Example.test:80/api///'), 'http://example.test/api');
+    assert.equal(normalizeHttpBaseUrl('https://Example.test:443/api///'), 'https://example.test/api');
+    assert.equal(normalizeHttpBaseUrl('https://Example.test\\api///'), 'https://example.test/api');
   });
 
   test('rejects unsupported, credentialed, relative, and ambiguous URLs', () => {

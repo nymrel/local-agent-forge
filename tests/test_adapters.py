@@ -26,6 +26,18 @@ class TestAdapters(unittest.TestCase):
             "https://example.test:8443/api",
         )
         self.assertEqual(normalize_http_base_url("http://[::1]:11434/"), "http://[::1]:11434")
+        self.assertEqual(
+            normalize_http_base_url("http://Example.test:80/api///"),
+            "http://example.test/api",
+        )
+        self.assertEqual(
+            normalize_http_base_url("https://Example.test:443/api///"),
+            "https://example.test/api",
+        )
+        self.assertEqual(
+            normalize_http_base_url(r"https://Example.test\api///"),
+            "https://example.test/api",
+        )
 
         invalid_endpoints = (
             "",

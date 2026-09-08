@@ -13,7 +13,7 @@
   },
   "implementation": [
     "Retargeted the full runtime, release, package, source-map, and documentation cohort.",
-    "Preserved URL normalization as syntax-only and aligned Python hostname casing with the JavaScript normalizer.",
+    "Preserved URL normalization as syntax-only and aligned Python with JavaScript for hostname casing, default HTTP(S) ports, and HTTP(S) backslashes.",
     "Kept the loopback proxy bounded to JSON requests, exact listener Host matching, no CORS, and a one-MiB request limit."
   ],
   "validation": {
@@ -24,7 +24,8 @@
       "source-to-committed-dist rebuild comparison with no unstaged dist difference",
       "Python wheel and sdist build plus package-content check",
       "installed-wheel import and local-forge-py --help smoke",
-      "cross-language URL canonicalization smoke"
+      "cross-language URL canonicalization smoke",
+      "Post-independent-review JS/Python regression coverage for default HTTP(S) ports and backslash canonicalization"
     ],
     "environmentLimit": "The local host used Node 22.17 and npm 10.9 while package engines require Node >=22.19 and npm >=11.5. Contracts passed, but exact engine-minimum coverage remains CI-scoped."
   },
@@ -47,5 +48,13 @@
     "merged": false,
     "deployed": false,
     "providerOrAccountMutation": false
+  },
+  "independentReviewFollowup": {
+    "finding": "JavaScript stripped default ports and canonicalized HTTP(S) backslashes while Python preserved them.",
+    "resolution": "Python now canonicalizes backslashes before parsing and rebuilds the authority from hostname and non-default port; both runtimes have regressions for :80, :443, and backslash paths.",
+    "targetedValidation": [
+      "node --test dist/test/http-url.test.js",
+      "PYTHONPATH=python Python URL parity smoke"
+    ]
   }
 }

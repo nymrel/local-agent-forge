@@ -11,6 +11,9 @@ const http_url_js_1 = require("../src/utils/http-url.js");
     (0, node_test_1.test)('normalizes credential-free HTTP(S) base URLs', () => {
         strict_1.default.equal((0, http_url_js_1.normalizeHttpBaseUrl)(' https://Example.test:8443/api/// '), 'https://example.test:8443/api');
         strict_1.default.equal((0, http_url_js_1.normalizeHttpBaseUrl)('http://[::1]:11434/'), 'http://[::1]:11434');
+        strict_1.default.equal((0, http_url_js_1.normalizeHttpBaseUrl)('http://Example.test:80/api///'), 'http://example.test/api');
+        strict_1.default.equal((0, http_url_js_1.normalizeHttpBaseUrl)('https://Example.test:443/api///'), 'https://example.test/api');
+        strict_1.default.equal((0, http_url_js_1.normalizeHttpBaseUrl)('https://Example.test\\api///'), 'https://example.test/api');
     });
     (0, node_test_1.test)('rejects unsupported, credentialed, relative, and ambiguous URLs', () => {
         for (const candidate of [
