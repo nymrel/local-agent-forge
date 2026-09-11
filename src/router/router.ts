@@ -12,6 +12,8 @@ import { getBestLocalModelForTask } from './registry.js';
 import {
   RoutingDecision,
   ExecutionReceipt,
+  ExecutionOutcome,
+  ExecutionBlocker,
   REASONING_ESCALATION_THRESHOLD
 } from './types.js';
 
@@ -184,6 +186,8 @@ export class LocalAgentRouter {
     let modelUsed = decision.targetModel;
     let adapterUsed = decision.adapterType;
     const isLocal = decision.route === 'LOCAL';
+    let outcome: ExecutionOutcome = 'completed';
+    let blocker: ExecutionBlocker | undefined;
 
     if (decision.route === 'LOCAL') {
       let adapter: ModelAdapter | null = null;
@@ -191,7 +195,16 @@ export class LocalAgentRouter {
       else if (decision.adapterType === 'vllm') adapter = this.adapters.vllm;
       else if (decision.adapterType === 'lmstudio') adapter = this.adapters.lmstudio;
 
-      if (adapter) {
+      if (!adapter) {
+        // No local engine instance resolved for this route: nothing was executed.
+        durationMs = Date.now() - start;
+        outcome = 'blocked';
+        blocker = {
+          code: 'LOCAL_ADAPTER_UNAVAILABLE',
+          message: `Route selected LOCAL (${decision.adapterType}) but no matching adapter is registered. Start the local inference engine or reroute to cloud.`
+        };
+        responseText = `[Local Forge Execution Blocked: ${blocker.message}]`;
+      } else {
         try {
           const comp = await adapter.generate(prompt, {
             model: decision.targetModel,
@@ -206,8 +219,13 @@ export class LocalAgentRouter {
           tokensPerSecond = comp.tokensPerSecond;
           modelUsed = comp.model;
         } catch (err: any) {
-          // Local execution error fallback simulation
+          // Local execution failed: report blocked instead of a fake completion.
           durationMs = Date.now() - start;
+          outcome = 'blocked';
+          blocker = {
+            code: 'LOCAL_ADAPTER_EXECUTION_FAILED',
+            message: `Local adapter '${decision.adapterType}' failed to generate via model '${decision.targetModel}': ${err.message}. Verify the engine is running and the model is pulled, or reroute to cloud.`
+          };
           responseText = `[Local Forge Offline Execution Fallback: ${err.message}]`;
         }
       }
@@ -216,6 +234,11 @@ export class LocalAgentRouter {
       if (options.cloudFallbackHandler) {
         responseText = await options.cloudFallbackHandler(prompt, decision.targetModel);
       } else {
+        outcome = 'blocked';
+        blocker = {
+          code: 'CLOUD_FALLBACK_HANDLER_MISSING',
+          message: `Routing escalated to cloud model '${decision.targetModel}' (${decision.escalationReason || 'High Reasoning'}) but no cloudFallbackHandler was provided. Supply a handler or reroute locally.`
+        };
         responseText = `[Cloud Frontier Escalation (${decision.targetModel}): ${decision.escalationReason || 'High Reasoning'}]`;
       }
       durationMs = Date.now() - start;
@@ -237,6 +260,8 @@ export class LocalAgentRouter {
 
     return {
       decision,
+      outcome,
+      ...(blocker ? { blocker } : {}),
       text: responseText,
       modelUsed,
       adapterUsed,
