@@ -71,8 +71,8 @@
     "npm": ">=11.5 <12"
   },
   "devDependencies": {
-    "@types/node": "22.20.1",
-    "typescript": "5.9.3"
+    "@types/node": "26.5.0",
+    "typescript": "7.0.2"
   },
   "sideEffects": false,
   "publishConfig": {
