@@ -5,7 +5,15 @@ Local Agent Forge is a pre-release, source-available toolkit for probing local i
 > [!IMPORTANT]
 > This repository is not a published or production-approved release. As checked on 2026-08-30, neither `@nymrel/local-forge` on npm nor `local-agent-forge` on PyPI exists. Use the source checkout for evaluation. Do not treat the package names, version, examples, or workflow definitions as evidence of a registry release, configured provider account, deployed service, available local model, customer activation, privacy certification, cost reduction, or revenue.
 
-## What is implemented
+## Choose a starting point
+
+| Your goal | First step | What to expect |
+| --- | --- | --- |
+| Understand whether this fits your work, without coding | Read [current boundaries](#current-boundaries) and the [security model](#security-model). | This is a toolkit for an existing local inference setup, with no hosted app or guided model installation. You can describe your goal in a [question](https://github.com/nymrel/local-agent-forge/issues) before installing anything. |
+| Build or troubleshoot an integration | Follow [source evaluation](#evaluate-from-source), then run `node bin/local-forge.js health`. | A health result describes the configured endpoint at that time. If it fails, check that your inference server is running and its base URL is correct before sending a prompt. |
+| Connect an agent | Build the source checkout, then configure a compatible stdio host to launch `node /absolute/path/to/local-agent-forge/bin/local-forge.js mcp`. | Start with tool discovery; use the returned input schemas. A routing decision is advisory, and a host may retain tool arguments. Do not infer execution or spending authority from a `CLOUD` decision. |
+
+## Implemented surfaces
 
 - TypeScript adapters for Ollama, vLLM, LM Studio, ComfyUI, and Whisper-compatible HTTP servers.
 - A Python adapter surface for the same five endpoint families.
