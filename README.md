@@ -10,7 +10,7 @@ Local Agent Forge is a pre-release, source-available toolkit for probing local i
 | Your goal | First step | What to expect |
 | --- | --- | --- |
 | Understand whether this fits your work, without coding | Read [current boundaries](#current-boundaries) and the [security model](#security-model). | This is a toolkit for an existing local inference setup, with no hosted app or guided model installation. You can describe your goal in a [question](https://github.com/nymrel/local-agent-forge/issues) before installing anything. |
-| Build or troubleshoot an integration | Follow [source evaluation](#evaluate-from-source), then run `node bin/local-forge.js health`. | A health result describes the configured endpoint at that time. If it fails, check that your inference server is running and its base URL is correct before sending a prompt. |
+| Build or troubleshoot an integration | Follow [source evaluation](#evaluate-from-source), then run `node bin/local-forge.js health`. | The CLI probes the five default local adapter endpoints. If a probe fails, check that its inference server is running at that default URL; a custom SDK endpoint needs an adapter-specific health check before sending a prompt. |
 | Connect an agent | Build the source checkout, then configure a compatible stdio host to launch `node /absolute/path/to/local-agent-forge/bin/local-forge.js mcp`. | Start with tool discovery; use the returned input schemas. A routing decision is advisory, and a host may retain tool arguments. Do not infer execution or spending authority from a `CLOUD` decision. |
 
 ## Implemented surfaces
