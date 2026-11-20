@@ -40,7 +40,7 @@ The adapters default to loopback endpoints. A caller can supply a remote HTTP(S)
 | Node.js | `>=22.19 <27` |
 | npm | `>=11.5 <12` (repository pin: `11.19.1`) |
 | Python | `>=3.11` (CI policy: 3.11 through 3.14) |
-| TypeScript | Repository compiler pin: `5.9.3` |
+| TypeScript | Repository compiler pin: `7.0.2` |
 
 ## Evaluate from source
 
